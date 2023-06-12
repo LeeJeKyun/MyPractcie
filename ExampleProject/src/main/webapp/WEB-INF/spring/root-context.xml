@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<!-- DB접속 정보 -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+		<property name="username" value="scott" />
+		<property name="password" value="tiger" />
+	</bean>
+	
+	<!-- 마이바티스 수행 객체 설정 (SqlSession) -->
+	<bean id="SqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	
+		<!-- 스프링 빈으로 등록된 dataSource를 이용한 DB접속정보 설정 -->
+		<property name="dataSource" ref="dataSource" />
+		
+		<property name="configLocation" value="classpath:/mybatis-config.xml"/>
+		
+		<property name="mapperLocations">
+			<array>
+				
+				<value>classpath:/**/dao/**/*Mapper.xml</value>
+			</array>
+		</property>
+	
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="web.dao, com.kh.test.notice.dao"></property>
+	</bean>
+	
+</beans>

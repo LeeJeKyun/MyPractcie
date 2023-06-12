@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="web.dao.face.BoardDao">
+	
+	<select id="selectCntAll" resultType="int" parameterType="String" >
+		SELECT count(*) FROM board
+		WHERE title LIKE '%${keyword}%'
+	</select>
+	
+	<select id="selectAll" resultType="hashmap" parameterType="util.Paging">
+		SELECT * FROM (
+			SELECT rownum rnum, S.* FROM ( SELECT
+				boardno, title, userid, content, hit, write_date 
+ 				, (SELECT COUNT(*) FROM recommend R WHERE R.boardno=B.boardno) AS recommend
+			FROM board B WHERE title LIKE '%${search}%'
+			ORDER BY boardno DESC ) S
+ 		)Board
+		 WHERE rnum BETWEEN #{startNo} AND #{endNo}
+	</select>
+	
+	<select id="selectBoardByBoardno" resultType="web.dto.Board" parameterType="int">
+		SELECT * FROM board
+		WHERE boardno = #{boardno}
+	</select>
+	
+	<select id="selectBoardFileByBoardno" resultType="web.dto.BoardFile" parameterType="web.dto.Board">
+		SELECT * FROM boardfile
+		WHERE boardno = #{boardno}
+		ORDER BY fileno DESC
+	</select>
+	
+	<select id="selectRecommend" resultType="int" parameterType="web.dto.Board">
+		SELECT count(*) FROM recommend
+		WHERE userid = '${userid}' AND boardno = #{boardno}
+	</select>
+	
+	<select id="selectRecommendCnt" resultType="int" parameterType="web.dto.Board">
+		SELECT count(*) FROM recommend
+		WHERE boardno = #{boardno}
+	</select>
+	
+	<update id="updateHit" parameterType="int">
+		UPDATE board
+		SET hit = hit+1
+		WHERE boardno = #{boardno}
+	</update>
+	
+	<select id="selectNextBoardSeq" resultType="int">
+		SELECT board_seq.nextval FROM dual
+	</select>
+	
+	<insert id="insertBoard" parameterType="web.dto.Board">
+		INSERT INTO board (boardno, title, userid, content, hit, write_date)
+		VALUES (#{boardno}, #{title}, #{userid}, #{content}, 0, sysdate)
+	</insert>
+	
+	<select id="selectNextBoardFileSeq" resultType="int">
+		SELECT boardfile_seq.nextval FROM dual
+	</select>
+	
+	<insert id="insertBoardFile" parameterType="web.dto.BoardFile">
+		INSERT INTO boardfile (fileno, boardno, originname, storedname, filesize, write_date)
+		VALUES ( #{fileno}, #{boardno}, #{originname}, #{storedname}, #{filesize}, sysdate )
+	</insert>
+	
+	<select id="selectBoardFileByFileno" parameterType="int" resultType="web.dto.BoardFile">
+		SELECT fileno, boardno, originname, storedname, filesize, write_date as writedate FROM boardfile
+		WHERE fileno = #{fileno}
+	</select>
+	
+</mapper>
